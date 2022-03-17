@@ -11,6 +11,9 @@
     <string name="menu_home">기록하기</string>
     <string name="menu_gallery">추억하기</string>
     <string name="menu_slideshow">나의 데이터보기</string>
+    <string name="menu_coloring">컬러링 테스트 </string>
     <!-- TODO: Remove or change this placeholder text -->
-<!--    <string name="hello_blank_fragment">Hello blank fragment</string>-->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <!--    <string name="hello_blank_fragment">Hello blank fragment</string>-->
 </resources>
