@@ -22,4 +22,9 @@
         android:name="com.example.ae_android.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+    <fragment
+        android:id="@+id/nav_coloring"
+        android:name="com.example.ae_android.ui.coloring.ColorOnPicFragment"
+        android:label="@string/menu_coloring"
+        tools:layout="@layout/fragment_color_on_pic" />
 </navigation>
