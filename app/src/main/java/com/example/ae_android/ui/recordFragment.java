@@ -16,6 +16,10 @@ import com.example.ae_android.R;
 
 public class recordFragment extends Fragment {
 
+    public recordFragment() {
+        // Required empty public constructor
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -44,10 +48,6 @@ public class recordFragment extends Fragment {
         }) ;
 
         return view;
-    }
-
-    public recordFragment() {
-        // Required empty public constructor
     }
 
 
