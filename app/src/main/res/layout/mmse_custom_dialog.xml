@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/mmse_corner"
+    android:layout_margin="20dp"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="MMSE 테스트를 \n하시겠습니까?"
+        android:layout_gravity="left"
+        android:textColor="#01befe"
+        android:textSize="30dp"
+        android:textStyle="bold"/>
+    <Button
+        android:id="@+id/mmse_dialog_test_btn"
+        android:paddingLeft="60dp"
+        android:paddingRight="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/mmse_dialog_btn_shape"
+        android:text="테스트 할게요"
+        android:textColor="@color/black"/>
+    <Button
+        android:id="@+id/mmse_dialog_pass_btn"
+        android:paddingLeft="60dp"
+        android:paddingRight="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/mmse_dialog_btn_shape"
+        android:text="다음에 할게요"
+        android:textColor="@color/black"/>
+</LinearLayout>
