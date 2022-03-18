@@ -8,31 +8,164 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
+import com.example.ae_android.NaverRecognizer;
 import com.example.ae_android.R;
+import com.example.ae_android.utils.AudioWriterPCM;
+import com.naver.speech.clientapi.SpeechConfig;
+import com.naver.speech.clientapi.SpeechRecognitionException;
+import com.naver.speech.clientapi.SpeechRecognitionListener;
+import com.naver.speech.clientapi.SpeechRecognitionResult;
+import com.naver.speech.clientapi.SpeechRecognizer;
+
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class MMSEFragment extends Fragment {
 
-    private MMSEViewModel mViewModel;
+    private static final String CLIENT_ID = "YOUR CLIENT ID";
+    private RecognitionHandler handler;
+    private NaverRecognizer naverRecognizer;
+    private AudioWriterPCM writer;
+    private String mResult;
+    private TextView mmse_answer;
 
-    public static MMSEFragment newInstance() {
-        return new MMSEFragment();
+    private void handleMessage(Message msg) {
+        switch (msg.what) {
+            // 음성 인식을 시작할 준비가 완료된 경우
+            case R.id.clientReady:
+                writer = new AudioWriterPCM(Environment.getExternalStorageDirectory().getAbsolutePath() + "/NaverSpeechTest");
+                writer.open("Test");
+                break;
+            // 현재 음성 인식이 진행되고 있는 경우
+            case R.id.audioRecording:
+                writer.write((short[]) msg.obj);
+                break;
+            // 처리가 되고 있는 도중에 결과를 받은 경우
+            case R.id.partialResult:
+                mResult = (String) (msg.obj);
+                mmse_answer.setText(mResult);
+                break;
+            // 최종 인식이 완료되면 유사 결과를 모두 보여준다.
+            case R.id.finalResult:
+                SpeechRecognitionResult speechRecognitionResult = (SpeechRecognitionResult) msg.obj;
+                List<String> results = speechRecognitionResult.getResults();
+                StringBuilder strBuf = new StringBuilder();
+                Integer i = 0;
+                for(String result : results) {
+                    if(i == 0) {
+                        strBuf.append(result);
+                        i += 1;
+                    }
+                }
+                mResult = strBuf.toString();
+                mmse_answer.setText(mResult);
+                break;
+            // 인식 오류가 발생한 경우
+            case R.id.recognitionError:
+                if (writer != null) {
+                    writer.close();
+                }
+                mResult = "Error code : " + msg.obj.toString();
+                mmse_answer.setText(mResult);
+                break;
+            // 음성 인식 비활성화 상태인 경우
+            case R.id.clientInactive :
+                if (writer != null) {
+                    writer.close();
+                }
+                break;
+        }
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.mmse_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.mmse_fragment, container, false);
+
+        ImageButton mmse_record_button = view.findViewById(R.id.mmse_record_button);
+        ImageButton mmse_pause_button = view.findViewById(R.id.mmse_pause_button);
+        mmse_answer = view.findViewById(R.id.mmse_answer);
+        handler = new RecognitionHandler(this);
+        naverRecognizer = new NaverRecognizer(getContext(), handler, CLIENT_ID);
+
+        //녹음 버튼 클릭 시 이벤트
+        mmse_record_button.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mmse_record_button.setVisibility(view.GONE);
+                mmse_pause_button.setVisibility(view.VISIBLE);
+
+                if(!naverRecognizer.getSpeechRecognizer().isRunning()) {
+                    mResult = "";
+                    naverRecognizer.recognize();
+                } else {
+                    Log.d("stt", "stop and wait Final Result");
+                    naverRecognizer.getSpeechRecognizer().stop();
+                }
+            }
+        }) ;
+
+        //녹음 중단 버튼 클릭 시 이벤트
+        mmse_pause_button.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mmse_pause_button.setVisibility(view.GONE);
+                mmse_record_button.setVisibility(view.VISIBLE);
+            }
+        }) ;
+
+        return view;
+    }
+
+    public MMSEFragment() {
+        // Required empty public constructor
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(MMSEViewModel.class);
-        // TODO: Use the ViewModel
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+    @Override
+    public void onStart() {
+        super.onStart(); // 음성인식 서버 초기화는 여기서
+        naverRecognizer.getSpeechRecognizer().initialize();
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mResult = "";
+        mmse_answer.setText("");
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        naverRecognizer.getSpeechRecognizer().release();
     }
 
+    static class RecognitionHandler extends Handler {
+        private final WeakReference<MMSEFragment> mFragment;
+        RecognitionHandler(MMSEFragment fragment) {
+            mFragment = new WeakReference<MMSEFragment>(fragment);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            MMSEFragment mmseFragment = mFragment.get();
+            if (mmseFragment != null) {
+                mmseFragment.handleMessage(msg);
+            }
+        }
+    }
 }
