@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ae_android.databinding.FragmentSlideshowBinding;
+import com.example.ae_android.ui.storycard.StorycardFragment;
 
 public class SlideshowFragment extends Fragment {
 
@@ -24,8 +25,16 @@ public class SlideshowFragment extends Fragment {
         binding = FragmentSlideshowBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textSlideshow;
-        slideshowViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        binding.storycardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StorycardFragment myStorycardFragment = new StorycardFragment();
+                myStorycardFragment.show(getActivity().getSupportFragmentManager(), "tag");
+            }
+        });
+
+        //final TextView textView = binding.textSlideshow;
+        //slideshowViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 
