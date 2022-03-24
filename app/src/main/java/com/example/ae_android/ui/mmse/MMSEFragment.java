@@ -2,6 +2,12 @@ package com.example.ae_android.ui.mmse;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,12 +18,16 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ae_android.NaverRecognizer;
 import com.example.ae_android.R;
@@ -33,12 +43,13 @@ import java.util.List;
 
 public class MMSEFragment extends Fragment {
 
-    private static final String CLIENT_ID = "YOUR CLIENT ID";
+    private static final String CLIENT_ID = "i5sifrmz5f";
     private RecognitionHandler handler;
     private NaverRecognizer naverRecognizer;
     private AudioWriterPCM writer;
     private String mResult;
     private TextView mmse_answer;
+
 
     private void handleMessage(Message msg) {
         switch (msg.what) {
@@ -104,15 +115,62 @@ public class MMSEFragment extends Fragment {
         mmse_record_button.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mmse_record_button.setVisibility(view.GONE);
-                mmse_pause_button.setVisibility(view.VISIBLE);
-
-                if(!naverRecognizer.getSpeechRecognizer().isRunning()) {
-                    mResult = "";
-                    naverRecognizer.recognize();
-                } else {
-                    Log.d("stt", "stop and wait Final Result");
-                    naverRecognizer.getSpeechRecognizer().stop();
+                //사용자의 OS 버전이 마시멜로우 이상일 경우
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                    int permissionResult = getContext().checkSelfPermission(Manifest.permission.RECORD_AUDIO);
+                    if(permissionResult == PackageManager.PERMISSION_DENIED) {
+                        if(shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+                            dialog.setTitle("권한이 필요합니다.")
+                                    .setMessage("이 기능을 사용하기 위해서는 권한이 필요합니다. 계속하시겠습니까?")
+                                    .setPositiveButton("네", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 1000);
+                                            }
+                                        }
+                                    }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toast.makeText(getContext(), "기능을 취소했습니다.", Toast.LENGTH_SHORT).show();
+                                }
+                            }).create().show();
+                        }
+                        //최초로 권한을 요청하는 경우
+                        else{
+                            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 1000);
+                        }
+                    }
+                    //권한이 있는 경우 음성 인식 기능 처리
+                    else{
+                        if(!naverRecognizer.getSpeechRecognizer().isRunning()){
+                            mResult = "";
+                            mmse_answer.setText("Connecting...");
+                            mmse_pause_button.setVisibility(view.VISIBLE);
+                            mmse_record_button.setVisibility(view.GONE);
+                            naverRecognizer.recognize();
+                        } else{
+                            mmse_pause_button.setVisibility(view.GONE);
+                            mmse_record_button.setVisibility(view.VISIBLE);
+                            naverRecognizer.getSpeechRecognizer().stop();
+                        }
+                    }
+                }
+                //사용자의 OS 버전이 마시멜로우 이하일 때
+                else{
+                    //음성 인식 기능 처리
+                    if(!naverRecognizer.getSpeechRecognizer().isRunning()){
+                        mResult = "";
+                        mmse_answer.setText("Connecting...");
+                        mmse_pause_button.setVisibility(view.VISIBLE);
+                        mmse_record_button.setVisibility(view.GONE);
+                        naverRecognizer.recognize();
+                    } else{
+                        mmse_pause_button.setVisibility(view.GONE);
+                        mmse_record_button.setVisibility(view.VISIBLE);
+                        naverRecognizer.getSpeechRecognizer().stop();
+                    }
                 }
             }
         }) ;
