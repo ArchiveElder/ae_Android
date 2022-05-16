@@ -1,0 +1,4 @@
+C:/Users/sua/AndroidStudioProjects/ae_Android/opencv/.cxx/Debug/2v1s02a1/x86/CMakeFiles/opencv_jni_shared.dir
+C:/Users/sua/AndroidStudioProjects/ae_Android/opencv/.cxx/Debug/2v1s02a1/x86/CMakeFiles/native-lib.dir
+C:/Users/sua/AndroidStudioProjects/ae_Android/opencv/.cxx/Debug/2v1s02a1/x86/CMakeFiles/edit_cache.dir
+C:/Users/sua/AndroidStudioProjects/ae_Android/opencv/.cxx/Debug/2v1s02a1/x86/CMakeFiles/rebuild_cache.dir
