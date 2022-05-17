@@ -12,7 +12,7 @@ include_directories(${pathOPENCV}/native/jni/include)
 # dummy target to bring libc++_shared.so into packages
 add_library(opencv_jni_shared STATIC dummy.cpp)
 
-dd_library( # Sets the name of the library.
+add_library( # Sets the name of the library.
         native-lib
 
         # Sets the library as a shared library.
